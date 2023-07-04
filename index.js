@@ -45,10 +45,19 @@ if (awayTeamGoals > homeTeamGoals) {
 	
 	💡 İPUCU - verilen data içindeki nesnelerin(objects) "Stage" anahtarına bakmalısınız
 */
-
-function Finaller(/* kodlar buraya */) {
-  /* kodlar buraya */
+function Finaller(fifaData) {
+  const finalMacı = fifaData.filter(
+    (match) => match["Stage"].toLowerCase() === "final"
+  );
+  return finalMacı;
 }
+// function Finaller(fifaData /* kodlar buraya */) {
+//   /* kodlar buraya */
+//   const finalMacı = fifaData.filter((match) => match["stage"] === "Final");
+//   return finalMacı;
+// }
+// const finalMacı = Finaller(fifaData);
+// console.log(finalMacı);
 
 /*  Görev 3: 
 	Bir higher-order fonksiyonu olan Yillar isimli fonksiyona aşağıdakileri uygulayın: 
@@ -57,7 +66,10 @@ function Finaller(/* kodlar buraya */) {
 	3. Finaller data setindeki tüm yılları içeren "years" adındaki diziyi(array) döndürecek
 	*/
 
-function Yillar(/* kodlar buraya */) {
+function Yillar(fifaData, callBack /* kodlar buraya */) {
+  const finalMacı = finallerCallback(fifaData);
+  const years = finalMacı.map((match) => match.Year);
+  return years;
   /* kodlar buraya */
 }
 
@@ -69,9 +81,26 @@ function Yillar(/* kodlar buraya */) {
 	💡 İPUCU: Beraberlikler(ties) için şimdilik endişelenmeyin (Detaylı bilgi için README dosyasına bakabilirsiniz.)
 	4. Tüm kazanan ülkelerin isimlerini içeren `kazananlar` adında bir dizi(array) döndürecek(return)  */
 
-function Kazananlar(/* kodlar buraya */) {
-  /* kodlar buraya */
+function Kazananlar(fifaData, finallerCallback) {
+  const finalMacı = finallerCallback(fifaData);
+  const kazananlar = finalMacı
+    .map((match) => {
+      if (match["Home Team Goals"] > match["Away Team Goals"]) {
+        return match["Home Team Name"];
+      } else if (match["Home Team Goals"] < match["Away Team Goals"]) {
+        return match["Away Team Name"];
+      } else {
+        return null;
+      }
+    })
+    .filter((winner) => winner !== null);
+
+  return kazananlar;
 }
+
+const finaller = Finaller(fifaData);
+const kazananlar = Kazananlar(fifaData, finaller);
+console.log(kazananlar);
 
 /*  Görev 5: 
 	Bir higher-order fonksiyonu olan YillaraGoreKazananlar isimli fonksiyona aşağıdakileri uygulayın:
@@ -83,10 +112,35 @@ function Kazananlar(/* kodlar buraya */) {
 	
 	💡 İPUCU: her cümlenin adım 4'te belirtilen cümleyle birebir aynı olması gerekmektedir.
 */
+function YillaraGoreKazananlar(
+  fifaData,
+  finallerCallback,
+  yillarCallback,
+  kazananlarCallback
+) {
+  const finaller = finallerCallback(fifaData); // Finalleri al
+  const yillar = yillarCallback(fifaData); // Yılları al
+  const kazananlar = kazananlarCallback(fifaData, finaller); // Kazananları bul
 
-function YillaraGoreKazananlar(/* kodlar buraya */) {
-  /* kodlar buraya */
+  const YillaraGoreKazananlar = yillar.map((year, index) => {
+    const kazanan = kazananlar[index];
+    return `${year} yılında, ${kazanan} dünya kupasını kazandı!`;
+  });
+
+  return YillaraGoreKazananlar;
 }
+
+const finaller = Finaller(fifaData); // Finaller fonksiyonu ile final maçlarını alalım
+const kazananlar = Kazananlar(fifaData, finaller); // Kazananları bulalım
+console.log(kazananlar);
+
+const YillaraGoreKazananlar = YillaraGoreKazananlar(
+  fifaData,
+  Finaller,
+  Yillar,
+  Kazananlar
+);
+console.log(YillaraGoreKazananlar);
 
 /*  Görev 6: 
 	Bir higher order fonksiyonu olan `OrtalamaGolSayisi` isimli fonksiyona aşağıdakileri uygulayın: 
@@ -102,9 +156,20 @@ function YillaraGoreKazananlar(/* kodlar buraya */) {
 	
 */
 
-function OrtalamaGolSayisi(/* kodlar buraya */) {
-  /* kodlar buraya */
+function OrtalamaGolSayisi(Finaller) {
+  const toplamGol = Finaller.reduce((toplam, final) => {
+    return toplam + final["evsahibi_gol"] + final["deplasman_gol"];
+  }, 0);
+
+  const ortalamaGol = toplamGol / (Finaller.length * 2);
+  const yuvarlanmisOrtalama = ortalamaGol.toFixed(2);
+
+  return yuvarlanmisOrtalama;
 }
+
+const finaller = Finaller(fifaData); // Finaller fonksiyonu ile final maçlarını alalım
+const ortalamaGolSayisi = OrtalamaGolSayisi(finaller);
+console.log(ortalamaGolSayisi);
 
 /// EKSTRA ÇALIŞMALAR ///
 
